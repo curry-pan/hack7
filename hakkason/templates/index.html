@@ -65,8 +65,8 @@
             height: 300px;
         }
         #displayImageRight {
-            width: 100%; /* 変換後の画像を大きくする */
-            height: 1000%; /* 変換後の画像を大きくする */
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
@@ -93,6 +93,7 @@
             </div>
         </div>
         <input type="hidden" id="artistInput" name="artist">
+        <button type="button" id="transformButton" style="display:none;" onclick="startTransformation()">変換</button>
     </form>
     <button id="downloadButton" style="display:none;" onclick="downloadImage()">ダウンロード</button>
     <button id="changeImageButton" style="display:none;" onclick="openFileDialog()">画像の変更</button>
@@ -116,8 +117,7 @@
             const file = event.target.files[0];
             if (file) {
                 previewFile(file);
-                hideDropArea();
-                document.getElementById('uploadForm').submit();
+                showTransformButton();
             }
         }
 
@@ -127,7 +127,6 @@
                 const img = document.getElementById('displayImageLeft');
                 img.src = e.target.result;
                 img.onload = () => adjustContainerSize(img, 'dropArea');
-                hideDropArea();
             }
             reader.readAsDataURL(file);
         }
@@ -161,6 +160,14 @@
             });
         }
 
+        function startTransformation() {
+            document.getElementById('uploadForm').submit();
+        }
+
+        function showTransformButton() {
+            document.getElementById('transformButton').style.display = 'inline';
+        }
+
         const dropArea = document.getElementById('dropArea');
         const dropText = document.getElementById('dropText');
         const selectButton = document.getElementById('selectButton');
@@ -182,8 +189,7 @@
             if (file) {
                 document.getElementById('fileInput').files = event.dataTransfer.files;
                 previewFile(file);
-                hideDropArea();
-                document.getElementById('uploadForm').submit();
+                showTransformButton();
             }
         });
 
