@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .image-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .image-container {
+            width: 45%;
+        }
+        .image-container img {
+            max-width: 50%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .arrow {
+            width: 50px;
+            height: auto;
+        }
+        button {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>画家変換アプリ</h1>
+    <button type="button" onclick="selectArtist('mone')">モネ</button>
+    <button type="button" onclick="selectArtist('vangogh')">ゴッホ</button>
+    <br>
+    <div class="image-wrapper">
+        <div class="image-container">
+            <img id="displayImageLeft" src="{{ uploaded_img or './../static/white.jpg' }}" alt="Default Image">
+        </div>
+        <img class="arrow" src="./../static/arrow.jpg" alt="Arrow">
+        <div class="image-container">
+            <img id="displayImageRight" src="{{ processed_img or './../static/white.jpg' }}" alt="Default Image">
+        </div>
+    </div>
+    <form id="uploadForm" action="/submit_form" method="post" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="file" style="display: none;" accept="image/*">
+        <input type="hidden" id="artistInput" name="artist">
+        <input type="button" id="uploadButton" value="アップロード" onclick="openFileDialog()">
+    </form>
+    <button id="downloadButton" style="display:none;" onclick="downloadImage()">ダウンロード</button>
+
+    <script>
+        let selectedArtist = "";
+
+        function selectArtist(artist) {
+            selectedArtist = artist;
+            document.getElementById('artistInput').value = artist;
+            console.log(`選択されたアーティスト: ${selectedArtist}`);
+        }
+
+        function openFileDialog() {
+            document.getElementById('fileInput').click();
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('displayImageLeft').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+
+                document.getElementById('uploadForm').submit();
+            }
+        });
+
+        function showDownloadButton() {
+            document.getElementById('downloadButton').style.display = 'inline';
+        }
+
+        function downloadImage() {
+            const filename = document.getElementById('displayImageRight').src.split('/').pop();
+            const link = document.createElement('a');
+            link.href = `/download/${filename}`;
+            link.download = filename;
+            link.click();
+        }
+
+        {% if processed_img %}
+        showDownloadButton();
+        {% endif %}
+    </script>
+</body>
+</html>
