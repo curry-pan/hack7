@@ -60,7 +60,7 @@
 </head>
 <body>
     <h1>画家変換アプリ</h1>
-    <form id="uploadForm" action="/submit_form" method="post" enctype="multipart/form-data" onsubmit="handleFormSubmit(event)">
+    <form id="uploadForm" action="/submit_form" method="post" enctype="multipart/form-data">
         <div>
             <input type="radio" id="mone" name="artist" value="mone" onclick="selectArtist('mone')">
             <label for="mone">モネ</label>
@@ -83,6 +83,7 @@
         <input type="hidden" id="artistInput" name="artist">
     </form>
     <button id="downloadButton" style="display:none;" onclick="downloadImage()">ダウンロード</button>
+    <button id="changeImageButton" style="display:none;" onclick="openFileDialog()">画像の変更</button>
 
     <script>
         let selectedArtist = "";
@@ -104,6 +105,7 @@
             if (file) {
                 previewFile(file);
                 hideDropArea();
+                document.getElementById('uploadForm').submit();
             }
         }
 
@@ -111,13 +113,11 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('displayImageLeft').src = e.target.result;
-                hideDropArea();
             }
             reader.readAsDataURL(file);
         }
 
         function handleFormSubmit(event) {
-            hideDropArea();
             event.preventDefault();
             const form = document.getElementById('uploadForm');
             const formData = new FormData(form);
@@ -132,6 +132,7 @@
                 throw new Error('ネットワークの応答が悪いです');
             }).then(html => {
                 document.documentElement.innerHTML = html;
+                hideDropArea();  // ドロップエリアを非表示にする
             }).catch(error => {
                 console.error('フォームの送信中にエラーが発生しました:', error);
             });
@@ -140,6 +141,7 @@
         const dropArea = document.getElementById('dropArea');
         const dropText = document.getElementById('dropText');
         const selectButton = document.getElementById('selectButton');
+        const changeImageButton = document.getElementById('changeImageButton');
 
         dropArea.addEventListener('dragover', (event) => {
             event.preventDefault();
@@ -158,12 +160,14 @@
                 document.getElementById('fileInput').files = event.dataTransfer.files;
                 previewFile(file);
                 hideDropArea();
+                document.getElementById('uploadForm').submit();
             }
         });
 
         function hideDropArea() {
             dropText.classList.add('hidden');
             selectButton.classList.add('hidden');
+            changeImageButton.style.display = 'inline';
         }
 
         function showDownloadButton() {
@@ -180,6 +184,8 @@
 
         {% if processed_img %}
         showDownloadButton();
+        document.getElementById('changeImageButton').style.display = 'inline';
+        hideDropArea();  // ドロップエリアを非表示にする
         {% endif %}
     </script>
 </body>
