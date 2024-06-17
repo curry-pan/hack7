@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>画家変換アプリ</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,12 +18,30 @@
         }
         .image-container {
             width: 45%;
+            border: 2px dashed #ccc;
+            position: relative;
+            padding: 10px;
         }
         .image-container img {
-            max-width: 50%;
+            max-width: 100%;
             height: auto;
             display: block;
             margin: 0 auto;
+        }
+        .image-container p {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #aaa;
+            font-size: 16px;
+        }
+        .image-container button {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
         }
         .arrow {
             width: 50px;
@@ -32,26 +50,38 @@
         button {
             margin-bottom: 10px;
         }
+        .dragover {
+            border-color: #000;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <h1>画家変換アプリ</h1>
-    <button type="button" onclick="selectArtist('mone')">モネ</button>
-    <button type="button" onclick="selectArtist('vangogh')">ゴッホ</button>
-    <br>
-    <div class="image-wrapper">
-        <div class="image-container">
-            <img id="displayImageLeft" src="{{ uploaded_img or './../static/white.jpg' }}" alt="Default Image">
+    <form id="uploadForm" action="/submit_form" method="post" enctype="multipart/form-data" onsubmit="handleFormSubmit(event)">
+        <div>
+            <input type="radio" id="mone" name="artist" value="mone" onclick="selectArtist('mone')">
+            <label for="mone">モネ</label>
+            <input type="radio" id="vangogh" name="artist" value="vangogh" onclick="selectArtist('vangogh')">
+            <label for="vangogh">ゴッホ</label>
         </div>
-        <img class="arrow" src="./../static/arrow.jpg" alt="Arrow">
-        <div class="image-container">
-            <img id="displayImageRight" src="{{ processed_img or './../static/white.jpg' }}" alt="Default Image">
+        <br>
+        <div class="image-wrapper">
+            <div class="image-container" id="dropArea">
+                <img id="displayImageLeft" src="{{ uploaded_img or 'static/white.jpg' }}" alt="Default Image">
+                <p id="dropText">ここにファイルをドロップ</p>
+                <input type="file" id="fileInput" name="file" style="display: none;" accept="image/*">
+                <button type="button" id="selectButton" onclick="openFileDialog()">ファイルを選択</button>
+            </div>
+            <img class="arrow" src="static/arrow.jpg" alt="Arrow">
+            <div class="image-container">
+                <img id="displayImageRight" src="{{ processed_img or 'static/white.jpg' }}" alt="Default Image">
+            </div>
         </div>
-    </div>
-    <form id="uploadForm" action="/submit_form" method="post" enctype="multipart/form-data">
-        <input type="file" id="fileInput" name="file" style="display: none;" accept="image/*">
         <input type="hidden" id="artistInput" name="artist">
-        <input type="button" id="uploadButton" value="アップロード" onclick="openFileDialog()">
+        <input type="submit" id="uploadButton" value="アップロード">
     </form>
     <button id="downloadButton" style="display:none;" onclick="downloadImage()">ダウンロード</button>
 
@@ -68,18 +98,74 @@
             document.getElementById('fileInput').click();
         }
 
-        document.getElementById('fileInput').addEventListener('change', function(event) {
+        document.getElementById('fileInput').addEventListener('change', handleFiles);
+
+        function handleFiles(event) {
             const file = event.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('displayImageLeft').src = e.target.result;
-                }
-                reader.readAsDataURL(file);
+                previewFile(file);
+                hideDropArea();
+            }
+        }
 
-                document.getElementById('uploadForm').submit();
+        function previewFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('displayImageLeft').src = e.target.result;
+                hideDropArea();
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function handleFormSubmit(event) {
+            hideDropArea();
+            event.preventDefault();
+            const form = document.getElementById('uploadForm');
+            const formData = new FormData(form);
+
+            fetch('/submit_form', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('ネットワークの応答が悪いです');
+            }).then(html => {
+                document.documentElement.innerHTML = html;
+            }).catch(error => {
+                console.error('フォームの送信中にエラーが発生しました:', error);
+            });
+        }
+
+        const dropArea = document.getElementById('dropArea');
+        const dropText = document.getElementById('dropText');
+        const selectButton = document.getElementById('selectButton');
+
+        dropArea.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropArea.classList.add('dragover');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragover');
+        });
+
+        dropArea.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropArea.classList.remove('dragover');
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                document.getElementById('fileInput').files = event.dataTransfer.files;
+                previewFile(file);
+                hideDropArea();
             }
         });
+
+        function hideDropArea() {
+            dropText.classList.add('hidden');
+            selectButton.classList.add('hidden');
+        }
 
         function showDownloadButton() {
             document.getElementById('downloadButton').style.display = 'inline';
