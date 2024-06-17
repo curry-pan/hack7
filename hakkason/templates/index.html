@@ -12,19 +12,22 @@
         }
         .image-wrapper {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             margin-bottom: 20px;
         }
         .image-container {
-            width: 45%;
             border: 2px dashed #ccc;
             position: relative;
             padding: 10px;
+            box-sizing: border-box;
+            margin: 0 20px;
+            width: 300px;
+            height: 300px;
         }
         .image-container img {
             max-width: 100%;
-            height: auto;
+            max-height: 100%;
             display: block;
             margin: 0 auto;
         }
@@ -46,6 +49,7 @@
         .arrow {
             width: 50px;
             height: auto;
+            margin: 0 20px;
         }
         button {
             margin-bottom: 10px;
@@ -55,6 +59,14 @@
         }
         .hidden {
             display: none;
+        }
+        #processedImageContainer {
+            width: 300px;
+            height: 300px;
+        }
+        #displayImageRight {
+            width: 100%; /* 変換後の画像を大きくする */
+            height: 1000%; /* 変換後の画像を大きくする */
         }
     </style>
 </head>
@@ -76,7 +88,7 @@
                 <button type="button" id="selectButton" onclick="openFileDialog()">ファイルを選択</button>
             </div>
             <img class="arrow" src="static/arrow.jpg" alt="Arrow">
-            <div class="image-container">
+            <div class="image-container" id="processedImageContainer">
                 <img id="displayImageRight" src="{{ processed_img or 'static/white.jpg' }}" alt="Default Image">
             </div>
         </div>
@@ -112,9 +124,18 @@
         function previewFile(file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                document.getElementById('displayImageLeft').src = e.target.result;
+                const img = document.getElementById('displayImageLeft');
+                img.src = e.target.result;
+                img.onload = () => adjustContainerSize(img, 'dropArea');
+                hideDropArea();
             }
             reader.readAsDataURL(file);
+        }
+
+        function adjustContainerSize(img, containerId) {
+            const container = document.getElementById(containerId);
+            container.style.width = `${img.width}px`;
+            container.style.height = `${img.height}px`;
         }
 
         function handleFormSubmit(event) {
@@ -133,6 +154,8 @@
             }).then(html => {
                 document.documentElement.innerHTML = html;
                 hideDropArea();  // ドロップエリアを非表示にする
+                const img = document.getElementById('displayImageRight');
+                img.onload = () => adjustContainerSize(img, 'processedImageContainer');
             }).catch(error => {
                 console.error('フォームの送信中にエラーが発生しました:', error);
             });
@@ -182,11 +205,15 @@
             link.click();
         }
 
-        {% if processed_img %}
-        showDownloadButton();
-        document.getElementById('changeImageButton').style.display = 'inline';
-        hideDropArea();  // ドロップエリアを非表示にする
-        {% endif %}
+        window.onload = function() {
+            const img = document.getElementById('displayImageRight');
+            img.onload = () => adjustContainerSize(img, 'processedImageContainer');
+            {% if processed_img %}
+                showDownloadButton();
+                document.getElementById('changeImageButton').style.display = 'inline';
+                hideDropArea();  // ドロップエリアを非表示にする
+            {% endif %}
+        }
     </script>
 </body>
 </html>
