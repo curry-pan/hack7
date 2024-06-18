@@ -1,11 +1,13 @@
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template, send_file, redirect, url_for
 import cv2
 import numpy as np
 from PIL import Image
 import os
 import shutil
 import tensorflow as tf
-from tensorflow.keras.layers import LayerNormalization  # 変更点
+from tensorflow.keras.layers import LayerNormalization
+import subprocess
+
  
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -51,7 +53,21 @@ def submit_form():
         filename = file.filename
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
- 
+
+
+        # Change directory to the pytorch-CycleGAN-and-pix2pix directory
+        os.chdir('C:\\hakk\\hakk\\pytorch-CycleGAN-and-pix2pix')
+
+        # Install dominate
+        subprocess.run(['pip', 'install', 'dominate'], check=True)
+
+        # Run the test.py script with different models
+        subprocess.run(['python', 'test.py', '--dataroot', 'C:\\hakk\\hakk\\datasets\\testA', '--name', 'style_ukiyoe_pretrained', '--model', 'test', '--no_dropout', '--gpu_ids', '-1'], check=True)
+        subprocess.run(['python', 'test.py', '--dataroot', 'C:\\hakk\\hakk\\datasets\\testA', '--name', 'style_monet_pretrained', '--model', 'test', '--no_dropout', '--gpu_ids', '-1'], check=True)
+        subprocess.run(['python', 'test.py', '--dataroot', 'C:\\hakk\\hakk\\datasets\\testA', '--name', 'style_cezanne_pretrained', '--model', 'test', '--no_dropout', '--gpu_ids', '-1'], check=True)
+        subprocess.run(['python', 'test.py', '--dataroot', 'C:\\hakk\\hakk\\datasets\\testA', '--name', 'style_vangogh_pretrained', '--model', 'test', '--no_dropout', '--gpu_ids', '-1'], check=True)
+
+        #画像の処理
         input_image = preprocess_image(file_path)
         processed_image_np = generate_image(model, input_image)
  
