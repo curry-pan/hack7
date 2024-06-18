@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            /* margin-top: 50px; */
+            margin-top: 50px;
         }
         .image-wrapper {
             display: flex;
@@ -77,12 +77,12 @@
     </header>
     <form id="uploadForm" action="/submit_form" method="post" enctype="multipart/form-data">
         <div>
-            <input type="radio" id="mone" name="artist" value="mone" onclick="selectArtist('mone')">
-            <label for="mone">モネ</label>
+            <input type="radio" id="monet" name="artist" value="monet" onclick="selectArtist('monet')" checked>
+            <label for="monet">モネ</label>
             <input type="radio" id="vangogh" name="artist" value="vangogh" onclick="selectArtist('vangogh')">
             <label for="vangogh">ゴッホ</label>
-            <input type="radio" id="Cezanne" name="artist" value="Cezanne" onclick="selectArtist('Cezanne')">
-            <label for="Cezanne">セザンヌ</label>
+            <input type="radio" id="cezanne" name="artist" value="cezanne" onclick="selectArtist('cezanne')">
+            <label for="cezanne">セザンヌ</label>
             <input type="radio" id="ukiyoe" name="artist" value="ukiyoe" onclick="selectArtist('ukiyoe')">
             <label for="ukiyoe">浮世絵</label>
         </div>
@@ -126,7 +126,6 @@
                 previewFile(file);
                 showTransformButton();	
                 hideDropArea();
-                // document.getElementById('uploadForm').submit();
             }
         }
 
@@ -136,7 +135,6 @@
                 const img = document.getElementById('displayImageLeft');
                 img.src = e.target.result;
                 img.onload = () => adjustContainerSize(img, 'dropArea');
-                // hideDropArea();
             }
             reader.readAsDataURL(file);
         }
@@ -200,7 +198,6 @@
                 previewFile(file);
                 showTransformButton();	
                 hideDropArea();
-                // document.getElementById('uploadForm').submit();
             }
         });
 
@@ -226,6 +223,7 @@
             const img = document.getElementById('displayImageRight');
             img.onload = () => adjustContainerSize(img, 'processedImageContainer');
             {% if processed_img %}
+                console.log('Processed Image Path:', '{{ processed_img }}'); // パスのデバッグ表示
                 showDownloadButton();
                 document.getElementById('changeImageButton').style.display = 'inline';
                 hideDropArea();  // ドロップエリアを非表示にする
