@@ -9,7 +9,31 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin-top: 50px;
+            background-color: #f0f8ff;
+            color: #333;
+            margin: 0;
+        }
+        header{
+            padding: 0.2%;
+            background-color: #1e90ff;
+            margin-bottom: 1%;
+        }
+        header img {
+            width: 150px;
+        }
+        .drop-container {
+            border: 2px dashed #1e90ff;
+            border-radius: 15px;
+            padding: 20px;
+            width: 60%;
+            margin: 0 auto 20px auto;
+            background-color: #e6f7ff;
+        }
+        .drop-container p {
+            margin: 0;
+            color: #1e90ff;
+            font-size: 1.5rem;
+            text-align: center;
         }
         .image-wrapper {
             display: flex;
@@ -37,29 +61,23 @@
             margin: auto;
             position: absolute;
         }
-        .image-container p {
-            margin: 0;
-            position: absolute;
-            top: 50%;
-            left: 30%;
-            transform: translate(-20%, -50%);
-            color: #FFF;
-            font-size: 1.5rem;
-            -webkit-text-stroke: 0.3px #000;
+        button {
+            margin-bottom: 10px;
+            background-color: #1e90ff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
-        .image-container button {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
+        button:hover {
+            background-color: #187bcd;
         }
         .arrow {
             width: 4%;
             height: 50px;
             margin: 0 2%;
-        }
-        button {
-            margin-bottom: 10px;
         }
         .dragover {
             border-color: #000;
@@ -67,15 +85,13 @@
         .hidden {
             display: none;
         }
-        #processedImageContainer {
-            width: 300px;
-            height: 300px;
-        }
     </style>
 </head>
 <body>
     <header>
-        <h1>pAInter</h1>
+        <a href="http://127.0.0.1:5000/">
+            <img src="static\logo.png" alt="アプリロゴ">
+        </a>
     </header>
     <form id="uploadForm" action="/submit_form" method="post" enctype="multipart/form-data">
         <div>
@@ -89,7 +105,7 @@
             <label for="ukiyoe">浮世絵</label>
         </div>
         <br>
-        <div class="image-wrapper">
+        <div class="drop-wrapper">
             <div class="drop-container" id="dropArea" onclick="openFileDialog()">
                 <p id="dropText">ここにファイルをドロップ<br>or<br>クリックして選択</p>
                 <input type="file" id="fileInput" name="file" style="display: none;" accept="image/*">
@@ -100,7 +116,7 @@
                 <img id="displayImageLeft" src="{{ uploaded_img or '../static/origin_sample.png' }}" alt="Default Image">
             </div>
             <img class="arrow" src="../static/arrow.jpg" alt="Arrow">
-            <div class="image-container" id="processedImageContainer">
+            <div class="image-container">
                 <img id="displayImageRight" src="{{ processed_img or '../static/gogh_sample.png' }}" alt="Default Image">
             </div>
         </div>
@@ -109,7 +125,7 @@
         <button type="button" id="transformButton" style="display:none;" onclick="startTransformation()">変換</button>
     </form>
     <button id="downloadButton" style="display:none;" onclick="downloadImage()">ダウンロード</button>
-    <button id="changeImageButton" style="display:none;" onclick="openFileDialog()">画像の変更</button>
+    <!-- <button id="changeImageButton" style="display:none;" onclick="openFileDialog()">画像の変更</button> -->
 
     <script>
         let selectedArtist = "";
@@ -130,7 +146,7 @@
             const file = event.target.files[0];
             if (file) {
                 previewFile(file);
-                showTransformButton();	
+                showTransformButton();
                 hideDropArea();
             }
         }
@@ -141,14 +157,22 @@
                 const img = document.getElementById('displayImageLeft');
                 img.src = e.target.result;
                 img.onload = () => adjustContainerSize(img, 'dropArea');
+                if (img) {
+                    img.onload = function() {
+                        adjustImageSize(img);
+                    };
+                    if (img.complete) {
+                        adjustImageSize(img);
+                    }
+                }
             }
             reader.readAsDataURL(file);
         }
 
         function adjustContainerSize(img, containerId) {
-            const container = document.getElementById(containerId);
-            container.style.width = `${img.width}px`;
-            container.style.height = `${img.height}px`;
+            // const container = document.getElementById(containerId);
+            // container.style.width = `${img.width}px`;
+            // container.style.height = `${img.height}px`;
         }
 
         function handleFormSubmit(event) {
@@ -184,7 +208,7 @@
         const dropArea = document.getElementById('dropArea');
         const dropText = document.getElementById('dropText');
         const selectButton = document.getElementById('selectButton');
-        const changeImageButton = document.getElementById('changeImageButton');
+        // const changeImageButton = document.getElementById('changeImageButton');
 
         dropArea.addEventListener('dragover', (event) => {
             event.preventDefault();
@@ -208,9 +232,9 @@
         });
 
         function hideDropArea() {
-            dropText.classList.add('hidden');
-            selectButton.classList.add('hidden');
-            changeImageButton.style.display = 'inline';
+            // dropText.classList.add('hidden');
+            // selectButton.classList.add('hidden');
+            // changeImageButton.style.display = 'inline';
         }
 
         function showDownloadButton() {
@@ -231,7 +255,7 @@
             {% if processed_img %}
                 console.log('Processed Image Path:', '{{ processed_img }}'); // パスのデバッグ表示
                 showDownloadButton();
-                document.getElementById('changeImageButton').style.display = 'inline';
+                // document.getElementById('changeImageButton').style.display = 'inline';
                 hideDropArea();  // ドロップエリアを非表示にする
             {% endif %}
         }
@@ -249,18 +273,6 @@
                 img.style.height = '100%';
             }
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const images = document.querySelectorAll('.image-container img');
-            images.forEach(img => {
-                img.onload = function() {
-                    adjustImageSize(img);
-                };
-                if (img.complete) { // For cached images
-                    adjustImageSize(img);
-                }
-            });
-        });
     </script>
 </body>
 </html>

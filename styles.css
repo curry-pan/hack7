@@ -1,0 +1,19 @@
+/* ラジオボタンのスタイル */
+input[type="radio"] {
+    display: none;
+}
+
+input[type="radio"] + label {
+    font-size: 1.2rem;
+    margin: 0 10px;
+    padding: 5px 15px;
+    border: 2px solid #1e90ff;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+input[type="radio"]:checked + label {
+    background-color: #1e90ff;
+    color: #fff;
+}
