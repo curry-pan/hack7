@@ -28,9 +28,14 @@
         }
         .image-container img {
             max-width: 90%;
-            max-height: auto;
+            max-height: 90%;
             display: block;
-            margin: 0 auto;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            position: absolute;
         }
         .image-container p {
             margin: 0;
@@ -65,10 +70,6 @@
         #processedImageContainer {
             width: 300px;
             height: 300px;
-        }
-        #displayImageRight {
-            width: 100%; /* 変換後の画像を大きくする */
-            height: 100%; /* 変換後の画像を大きくする */
         }
     </style>
 </head>
@@ -234,6 +235,32 @@
                 hideDropArea();  // ドロップエリアを非表示にする
             {% endif %}
         }
+        function adjustImageSize(img) {//画像の縦横比を維持したまま最大化
+            const containerWidth = img.parentElement.clientWidth;
+            const containerHeight = img.parentElement.clientHeight;
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const containerRatio = containerWidth / containerHeight;
+
+            if (imgRatio > containerRatio) {
+                img.style.width = '100%';
+                img.style.height = 'auto';
+            } else {
+                img.style.width = 'auto';
+                img.style.height = '100%';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.image-container img');
+            images.forEach(img => {
+                img.onload = function() {
+                    adjustImageSize(img);
+                };
+                if (img.complete) { // For cached images
+                    adjustImageSize(img);
+                }
+            });
+        });
     </script>
 </body>
 </html>
