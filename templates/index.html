@@ -92,11 +92,11 @@
                 <img id="displayImageLeft" src="{{ uploaded_img or '../static/origin_sample.png' }}" alt="Default Image">
                 <p id="dropText">ここにファイルを<br>ドロップか<br>クリックして選択</p>
                 <input type="file" id="fileInput" name="file" style="display: none;" accept="image/*">
-                <button type="button" id="selectButton" onclick="openFileDialog()">ファイルを選択</button>
+                <!-- <button type="button" id="selectButton" onclick="openFileDialog()">ファイルを選択</button> -->
             </div>
             <img class="arrow" src="../static/arrow.jpg" alt="Arrow">
             <div class="image-container" id="processedImageContainer">
-                <img id="displayImageRight" src="{{ processed_img or '../static/monet_sample.png' }}" alt="Default Image">
+                <img id="displayImageRight" src="{{ processed_img or '../static/gogh_sample.png' }}" alt="Default Image">
             </div>
         </div>
         <input type="hidden" id="artistInput" name="artist">
