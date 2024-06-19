@@ -1,0 +1,117 @@
+body {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin-top: 50px;
+    background-color: #f0f8ff;
+    color: #333;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    color: #1e90ff;
+    margin-bottom: 20px;
+}
+
+.image-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.drop-container {
+    border: 2px dashed #1e90ff;
+    border-radius: 15px;
+    position: relative;
+    padding: 20px;
+    box-sizing: border-box;
+    width: 80%;
+    margin: 0 auto 20px auto;
+    background-color: #e6f7ff;
+    transition: all 0.3s ease;
+}
+
+.drop-container p {
+    margin: 0;
+    color: #1e90ff;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+
+.image-container button {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1e90ff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.image-container button:hover {
+    background-color: #187bcd;
+}
+
+.arrow {
+    width: 4%;
+    height: 50px;
+    margin: 0 2%;
+}
+
+button {
+    margin-bottom: 10px;
+    background-color: #1e90ff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #187bcd;
+}
+
+.dragover {
+    border-color: #000;
+}
+
+.hidden {
+    display: none;
+}
+
+#processedImageContainer {
+    width: 300px;
+    height: 300px;
+}
+
+#displayImageRight {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+/* ラジオボタンのスタイル */
+input[type="radio"] {
+    display: none;
+}
+
+input[type="radio"] + label {
+    font-size: 1.2rem;
+    margin: 0 10px;
+    padding: 5px 15px;
+    border: 2px solid #1e90ff;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+input[type="radio"]:checked + label {
+    background-color: #1e90ff;
+    color: #fff;
+}

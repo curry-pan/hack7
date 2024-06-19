@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>画家変換アプリ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .image-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .image-container {
+            border: 2px dashed #ccc;
+            position: relative;
+            padding: 1%;
+            box-sizing: border-box;
+            margin: 0 1.25rem;
+            width: 300px;
+            height: 300px;
+        }
+        .image-container img {
+            max-width: 90%;
+            max-height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .image-container p {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 30%;
+            transform: translate(-20%, -50%);
+            color: #FFF;
+            font-size: 1.5rem;
+            -webkit-text-stroke: 0.3px #000;
+        }
+        .image-container button {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .arrow {
+            width: 4%;
+            height: 50px;
+            margin: 0 2%;
+        }
+        button {
+            margin-bottom: 10px;
+        }
+        .dragover {
+            border-color: #000;
+        }
+        .hidden {
+            display: none;
+        }
+        #processedImageContainer {
+            width: 300px;
+            height: 300px;
+        }
+        #displayImageRight {
+            width: 100%; /* 変換後の画像を大きくする */
+            height: 100%; /* 変換後の画像を大きくする */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>pAInter</h1>
+    </header>
+    <form id="uploadForm" action="/submit_form" method="post" enctype="multipart/form-data">
+        <div>
+            <input type="radio" id="monet" name="artist" value="monet" onclick="selectArtist('monet')" checked>
+            <label for="monet">モネ</label>
+            <input type="radio" id="vangogh" name="artist" value="vangogh" onclick="selectArtist('vangogh')">
+            <label for="vangogh">ゴッホ</label>
+            <input type="radio" id="cezanne" name="artist" value="cezanne" onclick="selectArtist('cezanne')">
+            <label for="cezanne">セザンヌ</label>
+            <input type="radio" id="ukiyoe" name="artist" value="ukiyoe" onclick="selectArtist('ukiyoe')">
+            <label for="ukiyoe">浮世絵</label>
+        </div>
+        <br>
+        <div class="image-wrapper">
+            <div class="drop-container" id="dropArea" onclick="openFileDialog()">
+                <p id="dropText">ここにファイルをドロップ<br>or<br>クリックして選択</p>
+                <input type="file" id="fileInput" name="file" style="display: none;" accept="image/*">
+            </div>
+        </div>
+        <div class="image-wrapper">
+            <div class="image-container">
+                <img id="displayImageLeft" src="{{ uploaded_img or '../static/origin_sample.png' }}" alt="Default Image">
+            </div>
+            <img class="arrow" src="../static/arrow.jpg" alt="Arrow">
+            <div class="image-container" id="processedImageContainer">
+                <img id="displayImageRight" src="{{ processed_img or '../static/gogh_sample.png' }}" alt="Default Image">
+            </div>
+        </div>
+        
+        <input type="hidden" id="artistInput" name="artist">
+        <button type="button" id="transformButton" style="display:none;" onclick="startTransformation()">変換</button>
+    </form>
+    <button id="downloadButton" style="display:none;" onclick="downloadImage()">ダウンロード</button>
+    <button id="changeImageButton" style="display:none;" onclick="openFileDialog()">画像の変更</button>
+
+    <script>
+        let selectedArtist = "";
+
+        function selectArtist(artist) {
+            selectedArtist = artist;
+            document.getElementById('artistInput').value = artist;
+            console.log(`選択されたアーティスト: ${selectedArtist}`);
+        }
+
+        function openFileDialog() {
+            document.getElementById('fileInput').click();
+        }
+
+        document.getElementById('fileInput').addEventListener('change', handleFiles);
+
+        function handleFiles(event) {
+            const file = event.target.files[0];
+            if (file) {
+                previewFile(file);
+                showTransformButton();	
+                hideDropArea();
+            }
+        }
+
+        function previewFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('displayImageLeft');
+                img.src = e.target.result;
+                img.onload = () => adjustContainerSize(img, 'dropArea');
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function adjustContainerSize(img, containerId) {
+            const container = document.getElementById(containerId);
+            container.style.width = `${img.width}px`;
+            container.style.height = `${img.height}px`;
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const form = document.getElementById('uploadForm');
+            const formData = new FormData(form);
+
+            fetch('/submit_form', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('ネットワークの応答が悪いです');
+            }).then(html => {
+                document.documentElement.innerHTML = html;
+                hideDropArea();  // ドロップエリアを非表示にする
+                const img = document.getElementById('displayImageRight');
+                img.onload = () => adjustContainerSize(img, 'processedImageContainer');
+            }).catch(error => {
+                console.error('フォームの送信中にエラーが発生しました:', error);
+            });
+        }
+
+        function startTransformation() {
+            document.getElementById('uploadForm').submit();	
+        }	
+        function showTransformButton() {	
+            document.getElementById('transformButton').style.display = 'inline';	
+        }
+
+        const dropArea = document.getElementById('dropArea');
+        const dropText = document.getElementById('dropText');
+        const selectButton = document.getElementById('selectButton');
+        const changeImageButton = document.getElementById('changeImageButton');
+
+        dropArea.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropArea.classList.add('dragover');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragover');
+        });
+
+        dropArea.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropArea.classList.remove('dragover');
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                document.getElementById('fileInput').files = event.dataTransfer.files;
+                previewFile(file);
+                showTransformButton();	
+                hideDropArea();
+            }
+        });
+
+        function hideDropArea() {
+            dropText.classList.add('hidden');
+            selectButton.classList.add('hidden');
+            changeImageButton.style.display = 'inline';
+        }
+
+        function showDownloadButton() {
+            document.getElementById('downloadButton').style.display = 'inline';
+        }
+
+        function downloadImage() {
+            const filename = document.getElementById('displayImageRight').src.split('/').pop();
+            const link = document.createElement('a');
+            link.href = `/download/${filename}`;
+            link.download = filename;
+            link.click();
+        }
+
+        window.onload = function() {
+            const img = document.getElementById('displayImageRight');
+            img.onload = () => adjustContainerSize(img, 'processedImageContainer');
+            {% if processed_img %}
+                console.log('Processed Image Path:', '{{ processed_img }}'); // パスのデバッグ表示
+                showDownloadButton();
+                document.getElementById('changeImageButton').style.display = 'inline';
+                hideDropArea();  // ドロップエリアを非表示にする
+            {% endif %}
+        }
+    </script>
+</body>
+</html>
