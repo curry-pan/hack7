@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> -->
-    <title>画家変換アプリ</title>
+    <title>pAInter</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,7 +25,6 @@
             border: 2px dashed #1e90ff;
             border-radius: 15px;
             padding: 20px 0;
-            width: 60%;
             margin: 0 auto 20px auto;
             background-color: #e6f7ff;
         }
@@ -39,11 +38,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
         }
         .image-container {
             display: block;
-            /* border: 2px dashed #ccc; */
             /* border: 2px solid #1e90ff; */
             position: relative;
             padding: 1%;
@@ -90,12 +87,6 @@
         .hidden {
             display: none;
         }
-        /* ラジオボタン */
-        /* .scp{
-            display: grid;
-            width: 100vw;
-            justify-content: center;
-        } */
         .scroller {
             display: flex;
             width: 90vw;
@@ -122,6 +113,45 @@
             background-color: #1e90ff;
             color: #fff;
         }
+        @media (max-width: 430px) {
+            #dropTextpc{
+                display: none;
+            }
+            #dropTextsp{
+                display: block;
+                width: 90%;
+                margin: 0 auto;
+            }
+            .drop-container {
+                width: 20vw;
+                height: 20vw;
+                padding: 0;
+                display: flex;
+                align-items: center;
+            }
+            .image-wrapper {
+                display: inline-block;
+                text-align: center;
+            }
+            .arrow {
+                transform: rotate(90deg);
+                min-width: 30px;
+                height: 50px;
+                margin-top: -7px;
+                margin-bottom: -10px;
+            }
+        }
+        @media (min-width: 431px) {
+            #dropTextpc{
+                display: block;
+            }
+            #dropTextsp{
+                display: none;
+            }
+            .drop-container {
+                width: 60vw;    
+            }
+        }
     </style>
 </head>
 <body>
@@ -131,22 +161,21 @@
         </a>
     </header>
     <form id="uploadForm" action="/submit_form" method="post" enctype="multipart/form-data">
-        <div class="scp">
-            <div class="scroller">
-                <input type="radio" id="monet" name="artist" value="monet" onclick="selectArtist('monet')" checked>
-                <label for="monet">モネ</label>
-                <input type="radio" id="vangogh" name="artist" value="vangogh" onclick="selectArtist('vangogh')">
-                <label for="vangogh">ゴッホ</label>
-                <input type="radio" id="cezanne" name="artist" value="cezanne" onclick="selectArtist('cezanne')">
-                <label for="cezanne">セザンヌ</label>
-                <input type="radio" id="ukiyoe" name="artist" value="ukiyoe" onclick="selectArtist('ukiyoe')">
-                <label for="ukiyoe">浮世絵</label>
-            </div>
+        <div class="scroller">
+            <input type="radio" id="monet" name="artist" value="monet" onclick="selectArtist('monet')" checked>
+            <label for="monet">モネ</label>
+            <input type="radio" id="vangogh" name="artist" value="vangogh" onclick="selectArtist('vangogh')">
+            <label for="vangogh">ゴッホ</label>
+            <input type="radio" id="cezanne" name="artist" value="cezanne" onclick="selectArtist('cezanne')">
+            <label for="cezanne">セザンヌ</label>
+            <input type="radio" id="ukiyoe" name="artist" value="ukiyoe" onclick="selectArtist('ukiyoe')">
+            <label for="ukiyoe">浮世絵</label>
         </div>
         <br>
         <div class="drop-wrapper">
             <div class="drop-container" id="dropArea" onclick="openFileDialog()">
-                <p id="dropText">ここにファイルをドロップ<br>or<br>クリックして選択</p>
+                <p id="dropTextpc">ここにファイルをドロップ<br>or<br>クリックして選択</p>
+                <img src="../static/pixup.png" alt="ここにファイルをドロップ" id="dropTextsp">
                 <input type="file" id="fileInput" name="file" style="display: none;" accept="image/*">
             </div>
         </div>
@@ -154,12 +183,12 @@
             <div class="image-container">
                 <img id="displayImageLeft" src="{{ uploaded_img or '../static/origin_sample.png' }}" alt="Default Image">
             </div>
-            <img class="arrow" src="../static/arrow.jpg" alt="Arrow">
+            <img class="arrow" src="../static/arrow.png" alt="Arrow">
             <div class="image-container">
                 <img id="displayImageRight" src="{{ processed_img or '../static/gogh_sample.png' }}" alt="Default Image">
             </div>
         </div>
-        
+        <br>
         <input type="hidden" id="artistInput" name="artist">
         <button type="button" id="transformButton" style="display:none;" onclick="startTransformation()">変換</button>
     </form>
@@ -245,7 +274,7 @@
         }
 
         const dropArea = document.getElementById('dropArea');
-        const dropText = document.getElementById('dropText');
+        // const dropText = document.getElementById('dropText');
         const selectButton = document.getElementById('selectButton');
         // const changeImageButton = document.getElementById('changeImageButton');
 
