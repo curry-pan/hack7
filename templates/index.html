@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> -->
     <title>画家変換アプリ</title>
     <style>
         body {
@@ -24,7 +24,7 @@
         .drop-container {
             border: 2px dashed #1e90ff;
             border-radius: 15px;
-            padding: 20px;
+            padding: 20px 0;
             width: 60%;
             margin: 0 auto 20px auto;
             background-color: #e6f7ff;
@@ -42,15 +42,20 @@
             margin-bottom: 20px;
         }
         .image-container {
-            border: 2px dashed #ccc;
+            display: block;
+            /* border: 2px dashed #ccc; */
+            /* border: 2px solid #1e90ff; */
             position: relative;
             padding: 1%;
             box-sizing: border-box;
-            margin: 0 1.25rem;
-            width: 300px;
-            height: 300px;
+            max-width: 300px;
+            max-height: 300px;
+            width: 40vw;
+            height: 40vw;
         }
         .image-container img {
+            border: 2px solid #1e90ff;
+            border-radius: 10px;
             max-width: 90%;
             max-height: 90%;
             display: block;
@@ -84,6 +89,23 @@
         }
         .hidden {
             display: none;
+        }
+        /* ラジオボタン */
+        input[type="radio"] {
+            display: none;
+        }
+        input[type="radio"] + label {
+            font-size: 1.2rem;
+            margin: 0 10px;
+            padding: 5px 15px;
+            border: 2px solid #1e90ff;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        input[type="radio"]:checked + label {
+            background-color: #1e90ff;
+            color: #fff;
         }
     </style>
 </head>
@@ -273,6 +295,27 @@
                 img.style.height = '100%';
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const img = document.querySelector('.image-container img');
+            const img2 = document.querySelector('#displayImageRight');
+            if (img) {
+                img.onload = function() {
+                    adjustImageSize(img);
+                };
+                if (img.complete) { // For cached images
+                    adjustImageSize(img);
+                }
+            }
+            if (img2) {
+                img2.onload = function() {
+                    adjustImageSize(img2);
+                };
+                if (img2.complete) { // For cached images
+                    adjustImageSize(img2);
+                }
+            }
+        });
     </script>
 </body>
 </html>
