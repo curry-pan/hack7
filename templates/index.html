@@ -91,12 +91,27 @@
             display: none;
         }
         /* ラジオボタン */
+        /* .scp{
+            display: grid;
+            width: 100vw;
+            justify-content: center;
+        } */
+        .scroller {
+            display: flex;
+            width: 90vw;
+            margin: 0 auto;
+            flex-wrap: nowrap;
+            justify-content: space-evenly;
+            overflow-x: auto;
+            max-width: 500px;
+        }
         input[type="radio"] {
             display: none;
         }
         input[type="radio"] + label {
+            white-space: nowrap;
             font-size: 1.2rem;
-            margin: 0 10px;
+            margin: 0 1%;
             padding: 5px 15px;
             border: 2px solid #1e90ff;
             border-radius: 20px;
@@ -116,15 +131,17 @@
         </a>
     </header>
     <form id="uploadForm" action="/submit_form" method="post" enctype="multipart/form-data">
-        <div>
-            <input type="radio" id="monet" name="artist" value="monet" onclick="selectArtist('monet')" checked>
-            <label for="monet">モネ</label>
-            <input type="radio" id="vangogh" name="artist" value="vangogh" onclick="selectArtist('vangogh')">
-            <label for="vangogh">ゴッホ</label>
-            <input type="radio" id="cezanne" name="artist" value="cezanne" onclick="selectArtist('cezanne')">
-            <label for="cezanne">セザンヌ</label>
-            <input type="radio" id="ukiyoe" name="artist" value="ukiyoe" onclick="selectArtist('ukiyoe')">
-            <label for="ukiyoe">浮世絵</label>
+        <div class="scp">
+            <div class="scroller">
+                <input type="radio" id="monet" name="artist" value="monet" onclick="selectArtist('monet')" checked>
+                <label for="monet">モネ</label>
+                <input type="radio" id="vangogh" name="artist" value="vangogh" onclick="selectArtist('vangogh')">
+                <label for="vangogh">ゴッホ</label>
+                <input type="radio" id="cezanne" name="artist" value="cezanne" onclick="selectArtist('cezanne')">
+                <label for="cezanne">セザンヌ</label>
+                <input type="radio" id="ukiyoe" name="artist" value="ukiyoe" onclick="selectArtist('ukiyoe')">
+                <label for="ukiyoe">浮世絵</label>
+            </div>
         </div>
         <br>
         <div class="drop-wrapper">
