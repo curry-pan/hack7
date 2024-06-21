@@ -5,13 +5,22 @@ import shutil
 import tensorflow as tf
 from tensorflow.keras.layers import LayerNormalization
 import subprocess
+import numpy as np
 
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['PROCESSED_FOLDER'] = 'static/processed'
-app.config['DATASET_FOLDER'] = 'C:/hakkason/hakk/datasets/testA'
-app.config['RESULTS_FOLDER'] = 'hakk/pytorch-CycleGAN-and-pix2pix/results'
+
+#パス変えました
+# app.config['DATASET_FOLDER'] = 'C:/hakkason/hakk/datasets/testA'
+#阿部用パス
+app.config['DATASET_FOLDER'] = 'C:\hakk\datasets\\testA'
+
+#パス変えました
+# app.config['RESULTS_FOLDER'] = 'hakk/pytorch-CycleGAN-and-pix2pix/results'
+#阿部用パス
+app.config['RESULTS_FOLDER'] = './../hakk/pytorch-CycleGAN-and-pix2pix/results'
 
 # CycleGANモデルの読み込み
 model = tf.keras.models.load_model("./saved_modelsDrop/cyclegan_model", custom_objects={'InstanceNormalization': LayerNormalization})
@@ -24,6 +33,10 @@ def preprocess_image(image_path):
     image = tf.cast(image, tf.float32)
     image = (image / 127.5) - 1
     return tf.expand_dims(image, 0)  # バッチ次元を追加
+
+def generate_image(model,input_image):
+    prediction = model(input_image)
+    return (prediction[0] * 0.5 + 0.5).numpy()
 
 @app.route('/')
 def index():
@@ -70,14 +83,19 @@ def submit_form():
         # ここでアーティストの値に基づいて適切な処理を行う
         print(f"選択されたアーティスト: {artist}")
         original_dir = os.getcwd()  # 元のディレクトリを保存
-        target_dir = 'hakk/pytorch-CycleGAN-and-pix2pix'
+
+        #パス変えました
+        # target_dir = 'hakk/pytorch-CycleGAN-and-pix2pix'
+        #阿部用パス
+        target_dir = './../hakk/pytorch-CycleGAN-and-pix2pix'
         if not os.path.isdir(target_dir):
             return f"指定されたパスが見つかりません: {target_dir}", 400
         try:
-            os.chdir(target_dir)
+            if artist != 'monet':
+                os.chdir(target_dir)
 
-            # 仮想環境のPythonを使用するように変更
-            venv_python = os.path.join(original_dir, 'venv', 'Scripts', 'python')
+                # 仮想環境のPythonを使用するように変更
+                venv_python = os.path.join(original_dir, 'venv', 'Scripts', 'python')
 
             result = None  # 初期化
 
@@ -86,8 +104,15 @@ def submit_form():
             if os.path.exists(results_subfolder):
                 shutil.rmtree(results_subfolder)
             os.makedirs(results_subfolder)
+
             if artist == "monet":
-                result = subprocess.run([venv_python, 'test.py', '--dataroot', dataset_dir, '--name', 'style_monet_pretrained', '--model', 'test', '--no_dropout', '--gpu_ids', '-1'], capture_output=True, text=True)
+                input_image = preprocess_image(file_path)
+                processed_image_np = generate_image(model,input_image)
+                processed_image_pil = Image.fromarray((processed_image_np * 255).astype(np.uint8))
+                processed_image_path = os.path.join(processed_dir,filename)
+                processed_image_pil.save(processed_image_path)
+
+                return render_template('index.html',uploaded_img=file_path,processed_img=processed_image_path)
             elif artist == "vangogh":
                 result = subprocess.run([venv_python, 'test.py', '--dataroot', dataset_dir, '--name', 'style_vangogh_pretrained', '--model', 'test', '--no_dropout', '--gpu_ids', '-1'], capture_output=True, text=True)
             elif artist == "cezanne":
@@ -125,9 +150,4 @@ def download_file(filename):
     return send_file(os.path.join(app.config['PROCESSED_FOLDER'], filename), as_attachment=True)
 
 if __name__ == "__main__":
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
-        os.makedirs(app.config['UPLOAD_FOLDER'])
-    if not os.path.exists(app.config['PROCESSED_FOLDER']):
-        os.makedirs(app.config['PROCESSED_FOLDER'])
-
     app.run(debug=True)
