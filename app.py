@@ -9,7 +9,7 @@ import numpy as np
 
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = 'static//uploads'
 app.config['PROCESSED_FOLDER'] = 'static/processed'
 
 #パス変えました
@@ -111,8 +111,14 @@ def submit_form():
                 processed_image_pil = Image.fromarray((processed_image_np * 255).astype(np.uint8))
                 processed_image_path = os.path.join(processed_dir,filename)
                 processed_image_pil.save(processed_image_path)
+                
+                processed_image = Image.open(processed_image_path)
+                processed_image = processed_image.resize(original_size)
+                processed_image_resized_path = os.path.join(processed_dir, f"resized_{filename}")
+                processed_image.save(processed_image_resized_path)
 
-                return render_template('index.html',uploaded_img=file_path,processed_img=processed_image_path)
+                return render_template('index.html',uploaded_img=file_path,processed_img=processed_image_resized_path)
+            
             elif artist == "vangogh":
                 result = subprocess.run([venv_python, 'test.py', '--dataroot', dataset_dir, '--name', 'style_vangogh_pretrained', '--model', 'test', '--no_dropout', '--gpu_ids', '-1'], capture_output=True, text=True)
             elif artist == "cezanne":
