@@ -6,21 +6,21 @@ import tensorflow as tf
 from tensorflow.keras.layers import LayerNormalization
 import subprocess
 import numpy as np
-
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static//uploads'
 app.config['PROCESSED_FOLDER'] = 'static/processed'
 
 #パス変えました
-# app.config['DATASET_FOLDER'] = 'C:/hakkason/hakk/datasets/testA'
+app.config['DATASET_FOLDER'] = 'C:/hakkason/hakk/datasets/testA'
 #阿部用パス
-app.config['DATASET_FOLDER'] = 'C:\hakk\datasets\\testA'
+# app.config['DATASET_FOLDER'] = 'C:\hakk\datasets\\testA'
 
 #パス変えました
-# app.config['RESULTS_FOLDER'] = 'hakk/pytorch-CycleGAN-and-pix2pix/results'
+app.config['RESULTS_FOLDER'] = 'hakk/pytorch-CycleGAN-and-pix2pix/results'
 #阿部用パス
-app.config['RESULTS_FOLDER'] = './../hakk/pytorch-CycleGAN-and-pix2pix/results'
+# app.config['RESULTS_FOLDER'] = './../hakk/pytorch-CycleGAN-and-pix2pix/results'
 
 # CycleGANモデルの読み込み
 model = tf.keras.models.load_model("./saved_modelsDrop/cyclegan_model", custom_objects={'InstanceNormalization': LayerNormalization})
@@ -85,13 +85,13 @@ def submit_form():
         original_dir = os.getcwd()  # 元のディレクトリを保存
 
         #パス変えました
-        # target_dir = 'hakk/pytorch-CycleGAN-and-pix2pix'
+        target_dir = 'hakk/pytorch-CycleGAN-and-pix2pix'
         #阿部用パス
-        target_dir = './../hakk/pytorch-CycleGAN-and-pix2pix'
+        # target_dir = './../hakk/pytorch-CycleGAN-and-pix2pix'
         if not os.path.isdir(target_dir):
             return f"指定されたパスが見つかりません: {target_dir}", 400
         try:
-            if artist != 'monet':
+            if artist != 'monet' or 1 == 1:
                 os.chdir(target_dir)
 
                 # 仮想環境のPythonを使用するように変更
@@ -106,19 +106,20 @@ def submit_form():
             os.makedirs(results_subfolder)
 
             if artist == "monet":
-                input_image = preprocess_image(file_path)
-                processed_image_np = generate_image(model,input_image)
-                processed_image_pil = Image.fromarray((processed_image_np * 255).astype(np.uint8))
-                processed_image_path = os.path.join(processed_dir,filename)
-                processed_image_pil.save(processed_image_path)
-                
-                processed_image = Image.open(processed_image_path)
-                processed_image = processed_image.resize(original_size)
-                processed_image_resized_path = os.path.join(processed_dir, f"resized_{filename}")
-                processed_image.save(processed_image_resized_path)
+                # input_image = preprocess_image(file_path)
+                # processed_image_np = generate_image(model,input_image)
+                # processed_image_pil = Image.fromarray((processed_image_np * 255).astype(np.uint8))
+                # processed_image_path = os.path.join(processed_dir,filename)
+                # processed_image_pil.save(processed_image_path)
 
-                return render_template('index.html',uploaded_img=file_path,processed_img=processed_image_resized_path)
-            
+                # processed_image = Image.open(processed_image_path)
+                # processed_image = processed_image.resize(original_size)
+                # processed_image_resized_path = os.path.join(processed_dir, f"resized_{filename}")
+                # processed_image.save(processed_image_resized_path)
+
+                # return render_template('index.html',uploaded_img=file_path,processed_img=processed_image_resized_path)
+
+                result = subprocess.run([venv_python, 'test.py', '--dataroot', dataset_dir, '--name', 'style_monet_pretrained', '--model', 'test', '--no_dropout', '--gpu_ids', '-1'], capture_output=True, text=True)
             elif artist == "vangogh":
                 result = subprocess.run([venv_python, 'test.py', '--dataroot', dataset_dir, '--name', 'style_vangogh_pretrained', '--model', 'test', '--no_dropout', '--gpu_ids', '-1'], capture_output=True, text=True)
             elif artist == "cezanne":
@@ -156,4 +157,6 @@ def download_file(filename):
     return send_file(os.path.join(app.config['PROCESSED_FOLDER'], filename), as_attachment=True)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
+    from waitress import serve
+    serve(app, host='0.0.0.0', port=5000)
